@@ -1,5 +1,10 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
+# environment variables
+.env
+.env.local
+backend/.env
+
 # dependencies
 node_modules/
 
@@ -41,4 +46,7 @@ app-example
 
 # backend
 backend/venv
-__pycache__
+backend/backend/__pycache__
+
+# docker
+*.pid
