@@ -33,6 +33,16 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Montserrat-VariableFont_wght.ttf",
+            "./assets/fonts/JetBrainsMono-VariableFont_wght.ttf",
+            "./assets/fonts/Inter-VariableFont_opsz,wght.ttf"
+          ]
+        }
       ]
     ],
     "experiments": {

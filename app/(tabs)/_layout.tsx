@@ -16,6 +16,7 @@ export default function Layout() {
         //     // paddingHorizontal: 16,
         // }}>
             <Tabs screenOptions={{
+                headerTransparent: true,
                 headerShown: false,
                 tabBarShowLabel: false,
                 tabBarButton: HapticTab,
@@ -28,7 +29,7 @@ export default function Layout() {
                     height: 50,
                     width: '90%',
                     paddingVertical: 15,
-                    backgroundColor: 'rgba( 51, 51, 51, 0.25 )',
+                    backgroundColor: 'rgba( 51, 51, 51, 0.90 )',
                     borderWidth: 1,
                     borderColor: 'rgba( 255, 255, 255, 0.18 )',
                     borderRadius: 50,
@@ -56,7 +57,7 @@ export default function Layout() {
                         tabBarIcon: ({ focused }) => (
                             <View style={{
                                 alignItems: 'center',
-                                marginVertical: 'auto'
+                                marginVertical: 'auto',
                                 // paddingTop: 10
                             }}>
                                 <Ionicons
