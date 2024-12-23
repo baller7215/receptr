@@ -1,20 +1,17 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
+import React, { useState } from 'react';
 import { Platform, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { HapticTab } from '@/components/HapticTab';
+import AddItem from './add';
 
 
 export default function Layout() {
+    const [showModal, setShowModal] = useState<boolean>(false);
+
     return (
-        // <View style={{
-        //     flex: 1,
-        //     // justifyContent: 'flex-end',
-        //     alignItems: 'center',
-        //     paddingBottom: 30,
-        //     // paddingHorizontal: 16,
-        // }}>
+        <>
             <Tabs screenOptions={{
                 headerTransparent: true,
                 headerShown: false,
@@ -89,21 +86,27 @@ export default function Layout() {
                 />
                 <Tabs.Screen 
                     name="add"
+                    listeners={{
+                        tabPress: (e) => {
+                            e.preventDefault();
+                            setShowModal(true);
+                        }
+                    }}
                     options={{
                         tabBarIcon: ({ focused }) => (
                             <View style={{
                                 // marginVertical: 'auto',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                height: 56,
-                                width: 56,
-                                borderRadius: 999,
-                                backgroundColor: '#FF70A6'
+                                height: 70,
+                                width: 70,
+                                // borderRadius: 999,
+                                // backgroundColor: '#FF70A6'
                             }}>
                                 <Ionicons
-                                    name={focused ? "add" : "add-outline"}
-                                    color={focused ? "#FEFEFA" : "#FEFEFA"}
-                                    size={32}
+                                    name={focused ? "add-circle" : "add-circle"}
+                                    color={focused ? "#FF70A6" : "#FEFEFA"}
+                                    size={70}
                                 />
                             </View>
                         )
@@ -146,6 +149,7 @@ export default function Layout() {
                     }}
                 />
             </Tabs>
-        // </View>
+            <AddItem visible={showModal} onClose={() => setShowModal(false)} />
+        </>
     )
 }

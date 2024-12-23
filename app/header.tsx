@@ -1,9 +1,11 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from 'react-native-elements';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
+import { Link } from 'expo-router';
+import Add from './(tabs)/add';
 
 /**@todo: look into implementing hapticfeedback for buttons */
 
@@ -18,6 +20,8 @@ const Header = ({ title, }: { title?: string; }) => {
         console.log(action);
     };
 
+    const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+
     return (
         <SafeAreaView style={[styles.safeArea]} edges={['top']}>
             <View style={[styles.header]}>
@@ -30,13 +34,27 @@ const Header = ({ title, }: { title?: string; }) => {
                         backgroundColor="rgba( 51, 51, 51, 0.90 )"
                         onPress={() => Haptics.selectionAsync()}
                     ></Ionicons.Button> */}
+                    {/* <Link href="/addModal" asChild>
+                        <Pressable>
+                            <Avatar
+                                size="medium"
+                                rounded
+                                icon={{name: 'search-outline', color: '#FEFEFA', size: 30, type: 'ionicon'}}
+                                // onPress={() => handleButtonPress('Search button clicked')}
+                                activeOpacity={0.7}
+                            />
+                        </Pressable>
+                        
+                    </Link> */}
                     <Avatar
                         size="medium"
                         rounded
                         icon={{name: 'search-outline', color: '#FEFEFA', size: 30, type: 'ionicon'}}
-                        onPress={() => handleButtonPress('Search button clicked')}
+                        // onPress={() => handleButtonPress('Search button clicked')}
+                        onPress={() => setIsAddModalVisible}
                         activeOpacity={0.7}
                     />
+                    <Add visible={isAddModalVisible} onClose={() => setIsAddModalVisible} />
                     <Avatar
                         size="medium"
                         rounded
@@ -52,6 +70,7 @@ const Header = ({ title, }: { title?: string; }) => {
                         activeOpacity={0.7}
                     />
                 </View>
+
             </View>
         </SafeAreaView>
         
