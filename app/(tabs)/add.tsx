@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, View, Text, TextInput, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Keyboard, Switch, ScrollView, KeyboardAvoidingView } from 'react-native';
+import { Modal, View, Text, TextInput, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Keyboard, Switch, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 // import { Modal, ModalBackdrop, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter } from '@/components/ui/modal';
 import { Picker } from '@react-native-picker/picker';
@@ -11,7 +11,6 @@ import Fontisto from '@expo/vector-icons/Fontisto';
 import * as Haptics from 'expo-haptics';
 
 const AddItem = ({ visible, onClose }: { visible: boolean, onClose: () => void }) => {
-    const [showModal, setShowModal] = React.useState(false);
     const [date, setDate] = useState<Date>();
     const [price, setPrice] = useState('');
     const [itemName, setItemName] = useState('');
@@ -19,12 +18,11 @@ const AddItem = ({ visible, onClose }: { visible: boolean, onClose: () => void }
     const [tags, setTags] = useState([]);
     const [description, setDescription] = useState('');
     const [isNecessary, setIsNecessary] = useState(false);
-    const [showDatePicker, setShowDatePicker] = useState(false);
     const [validationMessage, setValidationMessage] = useState('');
 
     // for handling swiping down to close modal
     const handleGesture = (event: any) => {
-        if (event.nativeEvent.translationY > 10) {
+        if (event.nativeEvent.translationY > 100) {
             console.log('close modal');
             onClose();
             // visible = false;
@@ -44,7 +42,7 @@ const AddItem = ({ visible, onClose }: { visible: boolean, onClose: () => void }
                     <TouchableWithoutFeedback onPress={onClose}>
                         <View style={styles.modalOverlay}>
                             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                                <KeyboardAvoidingView behavior="padding">
+                                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
                                     <PanGestureHandler onEnded={handleGesture}>
                                         {/* <> */}
                                             <View style={{ width: '70%', height: 5, borderRadius: 100, backgroundColor: '#FEFEFA80', marginHorizontal: 'auto', marginBottom: 20 }}></View>
@@ -124,17 +122,17 @@ const AddItem = ({ visible, onClose }: { visible: boolean, onClose: () => void }
                                             justifyContent: 'space-between',
                                             padding: 0,
                                         }}>
-                                            <View style={[styles.inputContainer, { width: '100%' }]}>
+                                            <View style={[styles.inputContainer, { width: '60%', backgroundColor: 'transparent', borderWidth: 0 }]}>
                                                 <View style={{ display: 'flex', flexDirection: 'row', gap: 5, marginRight: 'auto' }}>
-                                                    <Ionicons
+                                                    {/* <Ionicons
                                                         name={"text-outline"}
                                                         color={"#33333390"}
                                                         size={24}
                                                         style={{ marginVertical: 'auto' }}
-                                                    />
+                                                    /> */}
                                                     <TextInput
                                                         inputMode='text'
-                                                        placeholder='brocoli'
+                                                        placeholder='broccoli'
                                                         placeholderTextColor='#33333330'
                                                         style={styles.input}
                                                         value={itemName}
@@ -142,6 +140,25 @@ const AddItem = ({ visible, onClose }: { visible: boolean, onClose: () => void }
                                                     />
                                                 </View>
                                                 <Text style={[styles.label, { marginRight: 'auto', marginHorizontal: 0 }]}>item name</Text>
+                                            </View>
+                                            <View style={[styles.inputContainer, { width: '35%', backgroundColor: 'transparent', borderWidth: 0, marginLeft: 'auto' }]}>
+                                                <View style={{ display: 'flex', flexDirection: 'row', gap: 5, marginLeft: 'auto' }}>
+                                                    {/* <Ionicons
+                                                        name={"text-outline"}
+                                                        color={"#33333390"}
+                                                        size={24}
+                                                        style={{ marginVertical: 'auto' }}
+                                                    /> */}
+                                                    <TextInput
+                                                        inputMode='numeric'
+                                                        placeholder='1'
+                                                        placeholderTextColor='#33333330'
+                                                        style={[styles.input, { marginLeft: 'auto' }]}
+                                                        value={quantity}
+                                                        onChangeText={setQuantity}
+                                                    />
+                                                </View>
+                                                <Text style={[styles.label, { marginLeft: 'auto', marginHorizontal: 0 }]}>quantity</Text>
                                             </View>
                                         </View>
 
@@ -151,8 +168,8 @@ const AddItem = ({ visible, onClose }: { visible: boolean, onClose: () => void }
                                             justifyContent: 'space-between',
                                             padding: 0,
                                         }}>
-                                            <View style={[styles.inputContainer, { width: '100%' }]}>
-                                                <View style={{ display: 'flex', flexDirection: 'row', gap: 5, marginHorizontal: 'auto' }}>
+                                            <View style={[styles.inputContainer, { width: '100%', backgroundColor: 'transparent', borderWidth: 0, gap: 8 }]}>
+                                                <View style={{ display: 'flex', flexDirection: 'row', gap: 5, marginHorizontal: 'auto', justifyContent: 'center', width: '100%', borderBottomWidth: 1, }}>
                                                     <Fontisto
                                                         name="dollar"
                                                         color={"#33333390"}
@@ -160,7 +177,7 @@ const AddItem = ({ visible, onClose }: { visible: boolean, onClose: () => void }
                                                         style={{ marginVertical: 'auto' }}
                                                     />
                                                     <TextInput
-                                                        inputMode='numeric'
+                                                        inputMode='decimal'
                                                         placeholder='0.00'
                                                         placeholderTextColor='#33333330'
                                                         style={[styles.input, { fontSize: 80 }]}
@@ -178,8 +195,8 @@ const AddItem = ({ visible, onClose }: { visible: boolean, onClose: () => void }
                                             justifyContent: 'space-between',
                                             padding: 0,
                                         }}>
-                                            <View style={[styles.inputContainer, { width: '100%' }]}>
-                                                <View style={{ display: 'flex', flexDirection: 'row', gap: 5, marginHorizontal: 'auto' }}>
+                                            <View style={[styles.inputContainer, { width: '100%', backgroundColor: 'transparent', borderWidth: 0, gap: 8 }]}>
+                                                <View style={{ display: 'flex', flexDirection: 'row', gap: 5, marginHorizontal: 'auto', justifyContent: 'center', width: '100%', borderBottomWidth: 1, }}>
                                                     {/* <Fontisto
                                                         name="dollar"
                                                         color={"#33333390"}
@@ -190,11 +207,11 @@ const AddItem = ({ visible, onClose }: { visible: boolean, onClose: () => void }
                                                         editable
                                                         multiline
                                                         numberOfLines={3}
-                                                        maxLength={10}
+                                                        maxLength={150}
                                                         inputMode='text'
                                                         placeholder='add description...'
                                                         placeholderTextColor='#33333330'
-                                                        style={[styles.input, { fontSize: 16 }]}
+                                                        style={[styles.input, { fontSize: 20, width: '100%', textAlign: 'center' }]}
                                                         value={description}
                                                         onChangeText={setDescription}
                                                     />
@@ -216,10 +233,10 @@ const AddItem = ({ visible, onClose }: { visible: boolean, onClose: () => void }
 
 const styles = StyleSheet.create({
     modalOverlay: {
-        backgroundColor: '#FF70A6',
-        // flex: 1,
+        backgroundColor: '#70D6FF',
+        flex: 1,
         // justifyContent: 'flex-end',
-        height: '80%',
+        height: '95%',
         width: '100%',
         bottom: 0,
         position: 'absolute',
@@ -230,6 +247,8 @@ const styles = StyleSheet.create({
     modalContent: {
         // height: '80%',
         // width: '100%',
+        // backgroundColor: '#FF70A6',
+        // flex: 0
     },
     inputContainer: {
         display: 'flex',
@@ -237,8 +256,9 @@ const styles = StyleSheet.create({
         gap: 2,
         backgroundColor: '#33333320',
         padding: 7,
-        borderRadius: 10,
-        marginBottom: 10
+        borderRadius: 20,
+        borderWidth: 1,
+        marginBottom: 10,
     },
     datePicker: {
         // marginLeft: -10,
