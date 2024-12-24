@@ -44,9 +44,7 @@ const AddItem = ({ visible, onClose }: { visible: boolean, onClose: () => void }
                             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                                 <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
                                     <PanGestureHandler onEnded={handleGesture}>
-                                        {/* <> */}
-                                            <View style={{ width: '70%', height: 5, borderRadius: 100, backgroundColor: '#FEFEFA80', marginHorizontal: 'auto', marginBottom: 20 }}></View>
-                                        {/* </> */}
+                                        <View style={styles.handle}></View>
                                     </PanGestureHandler>
                                     {/* content for modal */}
                                     <ScrollView style={styles.modalContent}>
@@ -72,6 +70,7 @@ const AddItem = ({ visible, onClose }: { visible: boolean, onClose: () => void }
                                             {/* {showDatePicker && ( */}
                                             <View style={[styles.inputContainer, { 
                                                 width: '55%', 
+                                                backgroundColor: '#70D6FFC0'
                                                 // backgroundColor: date ? '#60D394' : '#33333320'
                                             } ]}>
                                                 <View style={{ display: 'flex', flexDirection: 'row', gap: 5, marginHorizontal: 'auto' }}>
@@ -99,6 +98,7 @@ const AddItem = ({ visible, onClose }: { visible: boolean, onClose: () => void }
                                             {/* necessary or not */}
                                             <View style={[styles.inputContainer, {
                                                 width: '40%', 
+                                                backgroundColor: '#FF70A6C0'
                                                 // backgroundColor: isNecessary ? '#60D394' : '#FF453A80' 
                                             }]}>
                                                 <View style={{ display: 'flex', flexDirection: 'row', gap: 5, marginHorizontal: 'auto' }}>
@@ -219,6 +219,37 @@ const AddItem = ({ visible, onClose }: { visible: boolean, onClose: () => void }
                                                 <Text style={[styles.label]}>description</Text>
                                             </View>
                                         </View>
+
+                                        {/* submit button */}
+                                        {/* Add this inside your ScrollView, at the end */}
+                                        <View style={{ marginVertical: 20, alignItems: 'center' }}>
+                                            <TouchableOpacity
+                                                style={{
+                                                    backgroundColor: '#60D394',
+                                                    paddingVertical: 12,
+                                                    paddingHorizontal: 30,
+                                                    borderRadius: 20,
+                                                    alignItems: 'center',
+                                                }}
+                                                onPress={() => {
+                                                    if (!date || !price || !itemName || !quantity) {
+                                                        setValidationMessage('Please fill in all fields.');
+                                                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning); // Optional haptic feedback
+                                                        return;
+                                                    }
+                                                    // Clear validation message
+                                                    setValidationMessage('');
+                                                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); // Optional haptic feedback
+                                                    console.log('Submitted:', { date, price, itemName, quantity, isNecessary });
+                                                    // Handle submit logic here
+                                                }}
+                                            >
+                                                <Text style={{ color: '#fff', fontSize: 18, fontWeight: 'bold' }}>Submit</Text>
+                                            </TouchableOpacity>
+                                            {validationMessage ? (
+                                                <Text style={{ color: '#FF453A', marginTop: 10 }}>{validationMessage}</Text>
+                                            ) : null}
+                                        </View>
                                     </ScrollView>
                                 </KeyboardAvoidingView>
                             </TouchableWithoutFeedback>
@@ -233,7 +264,7 @@ const AddItem = ({ visible, onClose }: { visible: boolean, onClose: () => void }
 
 const styles = StyleSheet.create({
     modalOverlay: {
-        backgroundColor: '#70D6FF',
+        backgroundColor: '#FEFEFA',
         flex: 1,
         // justifyContent: 'flex-end',
         height: '95%',
@@ -243,6 +274,14 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         padding: 20,
+    },
+    handle: {
+        width: '60%',
+        height: 5,
+        borderRadius: 100,
+        backgroundColor: '#33333350',
+        marginHorizontal: 'auto',
+        marginBottom: 20
     },
     modalContent: {
         // height: '80%',
