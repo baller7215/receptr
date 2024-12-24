@@ -10,7 +10,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-import "./global.css";
+// import "./global.css";
 import Header from './header';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.

@@ -7,42 +7,22 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 
 import * as Haptics from 'expo-haptics';
 
-const AddItem = ({ visible, onClose, onSubmit }: { visible: boolean, onClose: () => {}, onSubmit: () => {} }) => {
-    const [showModal, setShowModal] = React.useState(false);
-    const [date, setDate] = useState(new Date());
-    const [price, setPrice] = useState('');
-    const [itemName, setItemName] = useState('');
-    const [quantity, setQuantity] = useState('');
-    const [tags, setTags] = useState([]);
-    const [description, setDescription] = useState('');
-    const [isNecessary, setIsNecessary] = useState(false);
-    const [setshowDatePicker, setSetshowDatePicker] = useState(false);
-    const [validationMessage, setValidationMessage] = useState('');
+export default function HomeScreen() {
 
     return (
-        <Modal
-            isOpen={visible}
-            onClose={onClose}
-            useRNModal={true}
-            style={[styles.modal]}
-        >
-            <ModalBackdrop />
-            <ModalContent>
-                <ModalHeader>
-                    <ModalCloseButton></ModalCloseButton>
-                </ModalHeader>
-                <ModalBody />
-                <ModalFooter />
-            </ModalContent>
-        </Modal>
+        <View style={styles.mainContainer}>
+
+        </View>
     );
 };
 
 
 const styles = StyleSheet.create({
-    modal: {
-        
+    mainContainer: {
+        backgroundColor: '#010101',
+        flex: 1,
+        height: '100%',
+        width: '100%',
+        padding: 10
     }
 });
-
-export default AddItem;
