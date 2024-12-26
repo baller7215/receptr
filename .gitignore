@@ -46,7 +46,7 @@ app-example
 
 # backend
 backend/venv
-backend/backend/__pycache__
+backend/core/__pycache__
 
 # docker
 *.pid
