@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { Modal, View, Text, TextInput, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Keyboard, Switch, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 // import { Modal, ModalBackdrop, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter } from '@/components/ui/modal';
@@ -7,10 +8,14 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { PanGestureHandler } from 'react-native-gesture-handler';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Fontisto from '@expo/vector-icons/Fontisto';
-
 import * as Haptics from 'expo-haptics';
+import { AddItemProps, Item } from '@/types/types';
+// import { REACT_NATIVE_DEV_API_URL } from 'expo-env';
+// import { REACT_NATIVE_API_URL } from '@env';
 
-const AddItem = ({ visible, onClose }: { visible: boolean, onClose: () => void }) => {
+const AddItem = ({ visible, onClose, onItemAdded }: AddItemProps) => {
+    const [focusedInput, setFocusedInput] = useState<string | null>(null);
+
     const [date, setDate] = useState<Date>();
     const [price, setPrice] = useState('');
     const [itemName, setItemName] = useState('');
@@ -29,6 +34,74 @@ const AddItem = ({ visible, onClose }: { visible: boolean, onClose: () => void }
             
         }
     };
+
+    const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+    console.log('api url', apiUrl);
+
+    // for handling focus on input
+    const handleFocus = (inputName: string) => {
+        setFocusedInput(inputName);
+    };
+
+    const addItem = async (itemData: Omit<Item, 'id'>): Promise<Item> => {
+        try {
+            const formattedDate = date ? date.toISOString().split('T')[0] : null;
+            const formattedItemData = {
+                ...itemData,
+                date: formattedDate,
+                price: parseFloat(price).toFixed(2),
+
+            }
+            console.log(formattedItemData)
+            const response = await axios.post(`${apiUrl}/items/`, formattedItemData);
+            console.log('item added successfully', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error adding item:', error);
+            throw error;
+        }
+    }
+
+    const handleSubmit = async () => {
+        if (!date || !price || !itemName || !quantity) {
+            setValidationMessage('please fill in all fields.');
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+            return;
+        }
+
+        setValidationMessage('');
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        
+        const itemData: Omit<Item, 'id'> = {
+            item_name: itemName,
+            date: date,
+            price: parseFloat(price),
+            description: description,
+            quantity: parseInt(quantity),
+            necessary: isNecessary
+        };
+
+        // console.log('new item', itemData);
+
+        try {
+            const addedItem = await addItem(itemData);
+            console.log('item added:', addedItem);
+            setItemName('');
+            setDate(new Date());
+            setPrice('');
+            setDescription('');
+            setQuantity('');
+            setIsNecessary(false);
+
+            if (onItemAdded) {
+                onItemAdded(addedItem);
+            }
+            onClose();
+        } catch (error) {
+            setValidationMessage('error adding item. please try again.');
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        }
+    }
 
     return (
         <Modal
@@ -134,9 +207,10 @@ const AddItem = ({ visible, onClose }: { visible: boolean, onClose: () => void }
                                                         inputMode='text'
                                                         placeholder='broccoli'
                                                         placeholderTextColor='#33333330'
-                                                        style={styles.input}
+                                                        style={[styles.input, focusedInput === 'itemName' && styles.inputFocused]}
                                                         value={itemName}
                                                         onChangeText={setItemName}
+                                                        onFocus={() => handleFocus('itemName')}
                                                     />
                                                 </View>
                                                 <Text style={[styles.label, { marginRight: 'auto', marginHorizontal: 0 }]}>item name</Text>
@@ -153,9 +227,10 @@ const AddItem = ({ visible, onClose }: { visible: boolean, onClose: () => void }
                                                         inputMode='numeric'
                                                         placeholder='1'
                                                         placeholderTextColor='#33333330'
-                                                        style={[styles.input, { marginLeft: 'auto' }]}
+                                                        style={[styles.input, focusedInput === 'quantity' && styles.inputFocused, { marginLeft: 'auto', textAlign: 'right', width: '70%' }]}
                                                         value={quantity}
                                                         onChangeText={setQuantity}
+                                                        onFocus={() => handleFocus('quantity')}
                                                     />
                                                 </View>
                                                 <Text style={[styles.label, { marginLeft: 'auto', marginHorizontal: 0 }]}>quantity</Text>
@@ -180,9 +255,10 @@ const AddItem = ({ visible, onClose }: { visible: boolean, onClose: () => void }
                                                         inputMode='decimal'
                                                         placeholder='0.00'
                                                         placeholderTextColor='#33333330'
-                                                        style={[styles.input, { fontSize: 80 }]}
+                                                        style={[styles.input, focusedInput === 'price' && styles.inputFocused, { fontSize: 80 }]}
                                                         value={price}
                                                         onChangeText={setPrice}
+                                                        onFocus={() => handleFocus('price')}
                                                     />
                                                 </View>
                                                 <Text style={[styles.label]}>price</Text>
@@ -211,9 +287,10 @@ const AddItem = ({ visible, onClose }: { visible: boolean, onClose: () => void }
                                                         inputMode='text'
                                                         placeholder='add description...'
                                                         placeholderTextColor='#33333330'
-                                                        style={[styles.input, { fontSize: 20, width: '100%', textAlign: 'center' }]}
+                                                        style={[styles.input, focusedInput === 'description' && styles.inputFocused, { fontSize: 20, width: '100%', textAlign: 'center' }]}
                                                         value={description}
                                                         onChangeText={setDescription}
+                                                        onFocus={() => handleFocus('description')}
                                                     />
                                                 </View>
                                                 <Text style={[styles.label]}>description</Text>
@@ -231,18 +308,7 @@ const AddItem = ({ visible, onClose }: { visible: boolean, onClose: () => void }
                                                     borderRadius: 20,
                                                     alignItems: 'center',
                                                 }}
-                                                onPress={() => {
-                                                    if (!date || !price || !itemName || !quantity) {
-                                                        setValidationMessage('Please fill in all fields.');
-                                                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning); // Optional haptic feedback
-                                                        return;
-                                                    }
-                                                    // Clear validation message
-                                                    setValidationMessage('');
-                                                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); // Optional haptic feedback
-                                                    console.log('Submitted:', { date, price, itemName, quantity, isNecessary });
-                                                    // Handle submit logic here
-                                                }}
+                                                onPress={handleSubmit}
                                             >
                                                 <Text style={{ color: '#fff', fontSize: 18, fontWeight: 'bold' }}>Submit</Text>
                                             </TouchableOpacity>
@@ -313,8 +379,12 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontFamily: 'Montserrat',
         color: '#333333',
-        width: 'auto',
-        maxWidth: '90%'
+        // width: '100%',
+        // width: 'auto',
+        // maxWidth: '90%'
+    },
+    inputFocused: {
+        backgroundColor: '#33333330'
     },
     label: {
         marginVertical: 'auto',
