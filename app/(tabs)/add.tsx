@@ -36,7 +36,7 @@ const AddItem = ({ visible, onClose, onItemAdded }: AddItemProps) => {
     };
 
     const apiUrl = process.env.EXPO_PUBLIC_API_URL;
-    console.log('api url', apiUrl);
+    // console.log('api url', apiUrl);
 
     // for handling focus on input
     const handleFocus = (inputName: string) => {
@@ -49,7 +49,7 @@ const AddItem = ({ visible, onClose, onItemAdded }: AddItemProps) => {
             const formattedItemData = {
                 ...itemData,
                 date: formattedDate,
-                price: parseFloat(price).toFixed(2),
+                price: parseFloat(price),
 
             }
             console.log(formattedItemData)
@@ -96,11 +96,16 @@ const AddItem = ({ visible, onClose, onItemAdded }: AddItemProps) => {
             if (onItemAdded) {
                 onItemAdded(addedItem);
             }
-            onClose();
+            handleClose();
         } catch (error) {
             setValidationMessage('error adding item. please try again.');
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         }
+    }
+
+    const handleClose = () => {
+        setFocusedInput(null);
+        onClose();
     }
 
     return (
@@ -109,11 +114,11 @@ const AddItem = ({ visible, onClose, onItemAdded }: AddItemProps) => {
             animationType='slide'
             transparent
         >
-            <TouchableWithoutFeedback onPress={onClose}>
+            <TouchableWithoutFeedback onPress={handleClose}>
                 <SafeAreaView style={{ flex: 1 }}>
                     {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
-                    <TouchableWithoutFeedback onPress={onClose}>
-                        <View style={styles.modalOverlay}>
+                    <TouchableWithoutFeedback onPress={handleClose}>
+                        <View style={[styles.modalOverlay, focusedInput ? { height:'95%' } : { height: 'auto' }]}>
                             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                                 <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
                                     <PanGestureHandler onEnded={handleGesture}>
