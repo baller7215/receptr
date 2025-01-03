@@ -19,7 +19,7 @@ const AddItem = ({ visible, onClose, onItemAdded }: AddItemProps) => {
     const [date, setDate] = useState<Date>();
     const [price, setPrice] = useState('');
     const [itemName, setItemName] = useState('');
-    const [quantity, setQuantity] = useState('');
+    const [quantity, setQuantity] = useState('1');
     const [tags, setTags] = useState([]);
     const [description, setDescription] = useState('');
     const [isNecessary, setIsNecessary] = useState(false);
@@ -49,10 +49,11 @@ const AddItem = ({ visible, onClose, onItemAdded }: AddItemProps) => {
             const formattedItemData = {
                 ...itemData,
                 date: formattedDate,
-                price: parseFloat(price),
-
+                price: parseFloat(parseFloat(price).toFixed(2)),
+                description: description || null,
             }
-            console.log(formattedItemData)
+            console.log(formattedItemData);
+            console.log(apiUrl);
             const response = await axios.post(`${apiUrl}/items/`, formattedItemData);
             console.log('item added successfully', response.data);
             return response.data;

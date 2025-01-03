@@ -10,7 +10,7 @@ class Item(models.Model):
     date = models.DateField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     # item_id = models.CharField(max_length=255)
-    description = models.TextField(max_length=150)
+    description = models.TextField(max_length=150, blank=True, null=True)
     quantity = models.IntegerField(validators=[MinValueValidator(1)], default=1)
     necessary = models.BooleanField(default=False)
     # item_id = models.CharField(max_length=255, unique=True)

@@ -1,109 +1,178 @@
-import { StyleSheet, Image, Platform } from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Item } from '@/types/types';
+import { format, isToday, isYesterday, parseISO } from 'date-fns';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import Feather from '@expo/vector-icons/Feather';
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+export default function explore() {
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+  
+  // const [items, setItems] = useState<Item[]>([]);
+  const [groupedItems, setGroupedItems] = useState<Record<string, Item[]>>({});
 
-export default function TabTwoScreen() {
+  // method to fetch items from db
+  const fetchItems = async (): Promise<void> => {
+    try {
+      const response = await axios.get(`${apiUrl}/items/`);
+      console.log('items fetched successfully', response.data);
+      
+      const itemsList: Item[] = response.data.sort((a: Item, b: Item) => {
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      });
+
+      console.log('items list', itemsList);
+
+      const grouped = groupItemsByDate(itemsList);
+      console.log('grouped', grouped);
+      setGroupedItems(grouped);
+    } catch (error) {
+      console.error('Error fetching items:', error);
+      throw error;
+    }
+  };
+
+  // helper function to sort items by date so they are grouped together
+  const groupItemsByDate = (items: Item[]): Record<string, Item[]> => {
+    return items.reduce((groups: Record<string, Item[]>, item) => {
+      const date = parseISO(item.date.toString()); // Ensure the date is a valid Date object
+      let dateKey = format(date, 'MM-dd-yyyy'); // Default date format
+
+      if (isToday(date)) dateKey = 'Today';
+      else if (isYesterday(date)) dateKey = 'Yesterday';
+
+      if (!groups[dateKey]) groups[dateKey] = [];
+      groups[dateKey].push(item);
+  
+      return groups;
+    }, {});
+  }
+
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
+
+  // function used to calculate total cost of purchases made on a single day
+  const calculateTotalCost = (items: Item[]): number => {
+    return items.reduce((total, item) => total + item.price, 0);
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user's current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
-  );
+    <View style={styles.mainContainer}>
+      <Text style={styles.header}>explore</Text>
+      <FlatList
+        data={Object.keys(groupedItems)}
+        keyExtractor={(key) => key}
+        renderItem={({ item: dateKey }) => {
+          const totalCost = calculateTotalCost(groupedItems[dateKey]);
+
+          return (
+            <View style={styles.group}>
+              {/* date header */}
+              <View style={styles.dateHeaderGroup}>
+                <Text style={styles.dateHeader}>{dateKey}</Text>
+                <Text style={styles.dateHeader}>${totalCost}</Text>
+              </View>
+              {groupedItems[dateKey].map((purchase) => (
+                <View key={purchase.id} style={styles.purchaseItem}>
+                  {/* main content */}
+                  <View>
+                    <View style={{ flexDirection: 'row', gap: 5 }}>
+                      <Text style={styles.itemName}>{purchase.item_name}</Text>
+                      {purchase.necessary ? 
+                        <Ionicons
+                          name={"checkmark-outline"}
+                          color={"#60D394"}
+                          size={20}
+                          style={{ marginVertical: 'auto', marginLeft: 'auto' }}
+                        />
+                        :
+                        <Feather
+                          name="x"
+                          color={"#FF453A"}
+                          size={20}
+                          style={{ marginVertical: 'auto', marginLeft: 'auto' }}
+                        />
+                      }
+                    </View>
+                    {purchase.description &&
+                      <Text style={styles.itemText}>{purchase.description}</Text>
+                    }
+                  </View>
+                  
+                  {/* price */}
+                  <View>
+                    <Text style={styles.itemPrice}>${purchase.price}</Text>
+                    <Text style={[styles.itemPrice, { fontSize: 14 }]}>x{purchase.quantity}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          )
+        }}
+      />
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  mainContainer: {
+    backgroundColor: '#1B1B1B',
+    flex: 1,
+    height: '100%',
+    width: '100%',
+    padding: 20,
   },
-  titleContainer: {
+  header: {
+    color: '#FEFEFA',
+    fontFamily: 'Inter',
+    fontSize: 24,
+    fontWeight: 500,
+    marginBottom: 10,
+  },
+  group: {
+    paddingTop: 10,
+    paddingBottom: 10
+  },
+  dateHeaderGroup: {
     flexDirection: 'row',
-    gap: 8,
+    justifyContent: 'space-between',
+    gap: 5,
   },
-});
+  dateHeader: {
+    marginBottom: 5,
+    color: '#FEFEFA70',
+    fontFamily: 'JetBrainsMono',
+    fontSize: 20,
+  },
+  purchaseItem: {
+    backgroundColor: '#333333',
+    marginBottom: 10,
+    padding: 10,
+    borderRadius: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    rowGap: 5,
+  },
+  itemName: {
+    fontFamily: 'Montserrat',
+    color: '#FEFEFA',
+    fontSize: 18,
+    fontWeight: 600,
+  },
+  itemText: {
+    fontFamily: 'Inter',
+    color: '#FEFEFA70',
+    fontSize: 14,
+    fontWeight: 300,
+  },
+  itemPrice: {
+    fontFamily: 'JetBrainsMono',
+    color: '#FEFEFA',
+    fontSize: 18,
+    fontWeight: 600,
+    marginLeft: 'auto'
+  }
+})

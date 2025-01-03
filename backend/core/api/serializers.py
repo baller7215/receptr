@@ -30,6 +30,8 @@ class ItemSerializer(serializers.ModelSerializer):
     #     instance.necessary = validated_data.get('necessary', instance.necessary)
     #     instance.save()
     #     return instance
+    price = serializers.DecimalField(max_digits=10, decimal_places=2, coerce_to_string=False)
+
     class Meta:
         model = Item
         fields = '__all__'
