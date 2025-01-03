@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Modal, View, Text, TextInput, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Keyboard, Switch, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,17 +13,31 @@ import { AddItemProps, Item } from '@/types/types';
 // import { REACT_NATIVE_DEV_API_URL } from 'expo-env';
 // import { REACT_NATIVE_API_URL } from '@env';
 
-const AddItem = ({ visible, onClose, onItemAdded }: AddItemProps) => {
+const AddItem = ({ visible, onClose, onItemAdded, item }: AddItemProps) => {
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
-    const [date, setDate] = useState<Date>();
-    const [price, setPrice] = useState('');
-    const [itemName, setItemName] = useState('');
-    const [quantity, setQuantity] = useState('1');
+    const [date, setDate] = useState<Date>(item ? new Date(item.date) : new Date());
+    const [price, setPrice] = useState(item ? item.price.toString() : '');
+    const [itemName, setItemName] = useState(item ? item.item_name : '');
+    const [quantity, setQuantity] = useState(item ? item.quantity.toString() : '1');
     const [tags, setTags] = useState([]);
-    const [description, setDescription] = useState('');
-    const [isNecessary, setIsNecessary] = useState(false);
+    const [description, setDescription] = useState(item ? item.description : '');
+    const [isNecessary, setIsNecessary] = useState(item ? item.necessary : false);
     const [validationMessage, setValidationMessage] = useState('');
+
+    useEffect(() => {
+        if (item) {
+            setDate(new Date(item.date));
+            setPrice(item.price.toString());
+            setItemName(item.item_name);
+            setQuantity(item.quantity.toString());
+            setDescription(item.description);
+            setIsNecessary(item.necessary);
+        }
+    }, [item]);
+
+    // console.log('item', item);
+    // console.log('item initial attributes:', date, description, itemName, isNecessary, price, quantity);
 
     // for handling swiping down to close modal
     const handleGesture = (event: any) => {
@@ -63,6 +77,28 @@ const AddItem = ({ visible, onClose, onItemAdded }: AddItemProps) => {
         }
     }
 
+    const updateItem = async (itemData: Omit<Item, 'id'>): Promise<Item> => {
+        try {
+            const formattedDate = date ? date.toISOString().split('T')[0] : null;
+            const formattedItemData = {
+                ...itemData,
+                date: formattedDate,
+                price: parseFloat(parseFloat(price).toFixed(2)),
+                description: description || null,
+            }
+            const updatedItemData = { ...formattedItemData, id: item ? item.id : '' };
+            console.log(updatedItemData);
+            console.log(apiUrl);
+            const response = await axios.put(`${apiUrl}/items/${item ? item.id : ''}/`, updatedItemData);
+            console.log('item added successfully', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error updating item:', error);
+            throw error;
+        }
+    }
+
+
     const handleSubmit = async () => {
         if (!date || !price || !itemName || !quantity) {
             setValidationMessage('please fill in all fields.');
@@ -85,8 +121,20 @@ const AddItem = ({ visible, onClose, onItemAdded }: AddItemProps) => {
         // console.log('new item', itemData);
 
         try {
-            const addedItem = await addItem(itemData);
-            console.log('item added:', addedItem);
+            let addedItem: Item;
+
+            // if item exists, make api call to update
+            if (item) {
+                // const updatedItemData = { ...itemData, id: item.id };
+                // const response = await axios.put(`${apiUrl}/items/${item.id}/`, updatedItemData);
+                // addedItem = response.data;
+                addedItem = await updateItem(itemData);
+                console.log('item updated:', addedItem)
+            } else {
+                const addedItem = await addItem(itemData);
+                console.log('item added:', addedItem);
+            }
+            
             setItemName('');
             setDate(new Date());
             setPrice('');

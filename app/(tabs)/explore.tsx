@@ -1,10 +1,13 @@
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Item } from '@/types/types';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Feather from '@expo/vector-icons/Feather';
+import AddItem from './add';
+import * as Haptics from 'expo-haptics';
+
 
 export default function explore() {
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
@@ -59,6 +62,23 @@ export default function explore() {
     return items.reduce((total, item) => total + item.price, 0);
   }
 
+  
+  // handle updating purchase items by passing item to add item modal
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+
+  const openItemModal = (item: Item) => {
+    setSelectedItem(item);
+    setModalVisible(true);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  }
+
+  const closeItemModal = () => {
+    setModalVisible(false);
+    setSelectedItem(null);
+    fetchItems();
+  }
+
   return (
     <View style={styles.mainContainer}>
       <Text style={styles.header}>explore</Text>
@@ -76,7 +96,11 @@ export default function explore() {
                 <Text style={styles.dateHeader}>${totalCost}</Text>
               </View>
               {groupedItems[dateKey].map((purchase) => (
-                <View key={purchase.id} style={styles.purchaseItem}>
+                <TouchableOpacity
+                  key={purchase.id}
+                  style={styles.purchaseItem}
+                  onPress={() => openItemModal(purchase)}
+                >
                   {/* main content */}
                   <View>
                     <View style={{ flexDirection: 'row', gap: 5 }}>
@@ -107,12 +131,23 @@ export default function explore() {
                     <Text style={styles.itemPrice}>${purchase.price}</Text>
                     <Text style={[styles.itemPrice, { fontSize: 14 }]}>x{purchase.quantity}</Text>
                   </View>
-                </View>
+                </TouchableOpacity>
               ))}
             </View>
           )
         }}
       />
+
+      {/* modal */}
+      <AddItem
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onItemAdded={(updatedItem) => {
+          closeItemModal();
+        }}
+        item={selectedItem}
+      />
+
     </View>
   )
 }

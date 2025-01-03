@@ -12,4 +12,5 @@ export interface AddItemProps {
     visible: boolean;
     onClose: () => void;
     onItemAdded?: (item: Item) => void;
+    item?: Item | null;
 }
