@@ -1,50 +1,56 @@
-# Welcome to your Expo app 👋
+# Receptr
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Receptr is a mobile application designed to help users track expenses by scanning and categorizing receipts. The app utilizes **OCR (Optical Character Recognition)** to extract text from receipts and provides an intuitive interface for managing expenses.
 
-## Get started
+## Features
 
-1. Install dependencies
+- **React Native App** – Built with React Native for a smooth mobile experience.
+- **Receipt Scanning (OCR) - In Progress** – Uses Tesseract OCR and OpenCV to extract data from scanned receipts.
+- **Expense Categorization - In Progress** – Allows users to tag and sort expenses for easy tracking.
+- **Authentication - In Progress** – Secure user authentication with JWT and bcrypt.
+- **Backend API** – Built with Django and PostgreSQL for handling data storage and user accounts.
+- **Dockerized Backend** – The backend runs in a Docker container for easy setup and deployment.
+
+## Tech Stack
+
+- **Frontend:** React Native, Redux
+- **Backend:** Django REST Framework, PostgreSQL
+- **OCR Processing:** Tesseract OCR, OpenCV
+- **Authentication:** JWT, bcrypt
+- **Deployment & Dev Tools:** Docker, AWS S3 (for receipt storage)
+
+## Installation
+
+### Prerequisites
+
+- Node.js and npm
+- Python 3
+- Docker & Docker Compose
+- Expo CLI (`npx expo`)
+
+### Running the Project
+
+1. Clone the repository:
 
    ```bash
-   npm install
-   ```
+   git clone https://github.com/baller7215/receptr.git
+   cd receptr
 
-2. Start the app
+2. Start the frontend (React Native app):
 
    ```bash
-    npx expo start
-   ```
+   cd frontend
+   npx expo start
 
-In the output, you'll find options to open the app in a
+3. Start the backend (Django API using Docker):
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+   ```bash
+   cd backend
+   docker-compose up --build
+   
+## 🚧 Current Status 🚧
+This project is **still a work in progress** due to other commitments.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### Features in Progress
+- **OCR Receipt Scanner:** Implementing image processing and text extraction
+- **User Authentication** - Secure login and account management
