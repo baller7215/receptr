@@ -1,52 +1,47 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+# ─── Python Bytecode & Virtualenv ────────────────────────────────────────────
+**/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+venv/
+backend/venv/
 
-# environment variables
+# ─── Django / SQLite / Logs ──────────────────────────────────────────────────
+*.sqlite3
+*.log
+*.pot
+*.pyc
+
+# ─── Environment Variables ───────────────────────────────────────────────────
 .env
-.env.local
+.env.*
 backend/.env
 
-# dependencies
+# ─── Node & Expo ────────────────────────────────────────────────────────────
 node_modules/
-
-# Expo
 .expo/
 dist/
 web-build/
 expo-env.d.ts
+app-example/
 
-# Native
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-
-# Metro
+# ─── Metro & Debug ──────────────────────────────────────────────────────────
 .metro-health-check*
-
-# debug
 npm-debug.*
 yarn-debug.*
 yarn-error.*
 
-# macOS
+# ─── Docker ─────────────────────────────────────────────────────────────────
+*.pid
+
+# ─── macOS & Certificates ───────────────────────────────────────────────────
 .DS_Store
 *.pem
 
-# local env files
-.env*.local
-
-# typescript
-*.tsbuildinfo
-
-app-example
-
-
-
-# backend
-backend/venv
-backend/core/__pycache__
-
-# docker
-*.pid
+# ─── IDE / Editor ───────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln
