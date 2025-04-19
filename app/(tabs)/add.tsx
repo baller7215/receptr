@@ -120,8 +120,8 @@ const AddItem = ({ visible, onClose, onItemAdded, item }: AddItemProps) => {
 
         // console.log('new item', itemData);
 
+        let addedItem: Item | undefined;
         try {
-            let addedItem: Item;
 
             // if item exists, make api call to update
             if (item) {
@@ -131,7 +131,7 @@ const AddItem = ({ visible, onClose, onItemAdded, item }: AddItemProps) => {
                 addedItem = await updateItem(itemData);
                 console.log('item updated:', addedItem)
             } else {
-                const addedItem = await addItem(itemData);
+                addedItem = await addItem(itemData);
                 console.log('item added:', addedItem);
             }
             

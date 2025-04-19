@@ -1,7 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 import random
-import string
 
 # Create your models here.
 # django gives primary key autoatically

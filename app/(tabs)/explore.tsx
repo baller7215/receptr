@@ -18,6 +18,8 @@ export default function explore() {
   // method to fetch items from db
   const fetchItems = async (): Promise<void> => {
     try {
+      console.log('using api base url:', apiUrl);
+      console.log('full url:', `${apiUrl}/items/`);
       const response = await axios.get(`${apiUrl}/items/`);
       console.log('items fetched successfully', response.data);
       
@@ -39,8 +41,8 @@ export default function explore() {
   // helper function to sort items by date so they are grouped together
   const groupItemsByDate = (items: Item[]): Record<string, Item[]> => {
     return items.reduce((groups: Record<string, Item[]>, item) => {
-      const date = parseISO(item.date.toString()); // Ensure the date is a valid Date object
-      let dateKey = format(date, 'MM-dd-yyyy'); // Default date format
+      const date = parseISO(item.date.toString());
+      let dateKey = format(date, 'MM-dd-yyyy');
 
       if (isToday(date)) dateKey = 'Today';
       else if (isYesterday(date)) dateKey = 'Yesterday';
