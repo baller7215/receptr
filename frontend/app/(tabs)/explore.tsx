@@ -7,10 +7,11 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import Feather from '@expo/vector-icons/Feather';
 import AddItem from './add';
 import * as Haptics from 'expo-haptics';
+import Constants from 'expo-constants';
 
 
 export default function explore() {
-  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+  const apiUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_API_URL;
   
   // const [items, setItems] = useState<Item[]>([]);
   const [groupedItems, setGroupedItems] = useState<Record<string, Item[]>>({});
