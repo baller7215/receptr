@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Modal, View, Text, TextInput, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Keyboard, Switch, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-// import { Modal, ModalBackdrop, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter } from '@/components/ui/modal';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { PanGestureHandler } from 'react-native-gesture-handler';
@@ -10,8 +9,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import * as Haptics from 'expo-haptics';
 import { AddItemProps, Item } from '@/types/types';
-// import { REACT_NATIVE_DEV_API_URL } from 'expo-env';
-// import { REACT_NATIVE_API_URL } from '@env';
+import { useAddItemMutation, useUpdateItemMutation } from '@/services/useItemsMutations';
+import { useItems } from '@/features/items/useItems';
 
 const AddItem = ({ visible, onClose, onItemAdded, item }: AddItemProps) => {
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
@@ -25,6 +24,11 @@ const AddItem = ({ visible, onClose, onItemAdded, item }: AddItemProps) => {
     const [isNecessary, setIsNecessary] = useState(item ? item.necessary : false);
     const [validationMessage, setValidationMessage] = useState('');
 
+    const addMutation = useAddItemMutation();
+    const updateMutation = useUpdateItemMutation();
+
+    const { addItemByItem, updateItemByItem } = useItems();
+
     useEffect(() => {
         if (item) {
             setDate(new Date(item.date));
@@ -36,8 +40,6 @@ const AddItem = ({ visible, onClose, onItemAdded, item }: AddItemProps) => {
         }
     }, [item]);
 
-    // console.log('item', item);
-    // console.log('item initial attributes:', date, description, itemName, isNecessary, price, quantity);
 
     // for handling swiping down to close modal
     const handleGesture = (event: any) => {
@@ -49,54 +51,11 @@ const AddItem = ({ visible, onClose, onItemAdded, item }: AddItemProps) => {
         }
     };
 
-    const apiUrl = process.env.EXPO_PUBLIC_API_URL;
-    // console.log('api url', apiUrl);
 
     // for handling focus on input
     const handleFocus = (inputName: string) => {
         setFocusedInput(inputName);
     };
-
-    const addItem = async (itemData: Omit<Item, 'id'>): Promise<Item> => {
-        try {
-            const formattedDate = date ? date.toISOString().split('T')[0] : null;
-            const formattedItemData = {
-                ...itemData,
-                date: formattedDate,
-                price: parseFloat(parseFloat(price).toFixed(2)),
-                description: description || null,
-            }
-            console.log(formattedItemData);
-            console.log(apiUrl);
-            const response = await axios.post(`${apiUrl}/items/`, formattedItemData);
-            console.log('item added successfully', response.data);
-            return response.data;
-        } catch (error) {
-            console.error('Error adding item:', error);
-            throw error;
-        }
-    }
-
-    const updateItem = async (itemData: Omit<Item, 'id'>): Promise<Item> => {
-        try {
-            const formattedDate = date ? date.toISOString().split('T')[0] : null;
-            const formattedItemData = {
-                ...itemData,
-                date: formattedDate,
-                price: parseFloat(parseFloat(price).toFixed(2)),
-                description: description || null,
-            }
-            const updatedItemData = { ...formattedItemData, id: item ? item.id : '' };
-            console.log(updatedItemData);
-            console.log(apiUrl);
-            const response = await axios.put(`${apiUrl}/items/${item ? item.id : ''}/`, updatedItemData);
-            console.log('item added successfully', response.data);
-            return response.data;
-        } catch (error) {
-            console.error('Error updating item:', error);
-            throw error;
-        }
-    }
 
 
     const handleSubmit = async () => {
@@ -109,7 +68,7 @@ const AddItem = ({ visible, onClose, onItemAdded, item }: AddItemProps) => {
         setValidationMessage('');
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         
-        const itemData: Omit<Item, 'id'> = {
+        const payload: Omit<Item, 'id'> = {
             item_name: itemName,
             date: date,
             price: parseFloat(price),
@@ -118,38 +77,41 @@ const AddItem = ({ visible, onClose, onItemAdded, item }: AddItemProps) => {
             necessary: isNecessary
         };
 
-        // console.log('new item', itemData);
-
-        let addedItem: Item | undefined;
-        try {
-
-            // if item exists, make api call to update
-            if (item) {
-                // const updatedItemData = { ...itemData, id: item.id };
-                // const response = await axios.put(`${apiUrl}/items/${item.id}/`, updatedItemData);
-                // addedItem = response.data;
-                addedItem = await updateItem(itemData);
-                console.log('item updated:', addedItem)
-            } else {
-                addedItem = await addItem(itemData);
-                console.log('item added:', addedItem);
-            }
-            
-            setItemName('');
-            setDate(new Date());
-            setPrice('');
-            setDescription('');
-            setQuantity('');
-            setIsNecessary(false);
-
-            if (onItemAdded) {
-                onItemAdded(addedItem);
-            }
-            handleClose();
-        } catch (error) {
-            setValidationMessage('error adding item. please try again.');
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        // if item exists, make api call to update
+        if (item) {
+            updateMutation.mutate(
+                { id: item.id, data: payload },
+                {
+                    onSuccess: (updatedItem) => {
+                        updateItemByItem(updatedItem);
+                        onItemAdded?.(updatedItem);
+                        onClose();
+                    },
+                    onError: () => {
+                        setValidationMessage('Error updating item.')
+                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
+                    }
+                }
+            )
+        } else {
+            addMutation.mutate(payload, {
+                onSuccess: (addedItem) => {
+                    onItemAdded?.(addedItem);
+                    onClose();
+                },
+                onError: () => {
+                    setValidationMessage('Error adding item.')
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
+                },
+            })
         }
+
+        setItemName('');
+        setDate(new Date());
+        setPrice('');
+        setDescription('');
+        setQuantity('');
+        setIsNecessary(false);
     }
 
     const handleClose = () => {

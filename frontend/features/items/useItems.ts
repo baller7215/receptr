@@ -5,15 +5,15 @@ import {
     removeItem,
     updateItem,
     setItems,
-    Item,
 } from './itemsSlice';
+import { Item } from '@/types/types';
 
 export function useItems() {
     const items = useSelector((s: RootState) => s.items.items)
     const dispatch = useDispatch<AppDispatch>()
 
     const addItemByItem = (item: Item) => dispatch(addItem(item))
-    const removeItemById = (id: string) => dispatch(removeItem(id))
+    const removeItemById = (id: number) => dispatch(removeItem(id))
     const updateItemByItem = (item: Item) => dispatch(updateItem(item))
     const loadItems = (all: Item[]) => dispatch(setItems(all))
 

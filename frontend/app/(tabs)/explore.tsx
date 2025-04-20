@@ -1,85 +1,68 @@
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Item } from '@/types/types';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Feather from '@expo/vector-icons/Feather';
 import AddItem from './add';
 import * as Haptics from 'expo-haptics';
-import Constants from 'expo-constants';
+import { useGetItems } from '@/services/useItems';
+import { useItems } from '@/features/items/useItems';
 
 
 export default function explore() {
-  const apiUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_API_URL;
-  
-  // const [items, setItems] = useState<Item[]>([]);
-  const [groupedItems, setGroupedItems] = useState<Record<string, Item[]>>({});
+  const { data: fetchedItems = [], isLoading, refetch } = useGetItems();
 
-  // method to fetch items from db
-  const fetchItems = async (): Promise<void> => {
-    try {
-      console.log('using api base url:', apiUrl);
-      console.log('full url:', `${apiUrl}/items/`);
-      const response = await axios.get(`${apiUrl}/items/`);
-      console.log('items fetched successfully', response.data);
-      
-      const itemsList: Item[] = response.data.sort((a: Item, b: Item) => {
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
-      });
-
-      console.log('items list', itemsList);
-
-      const grouped = groupItemsByDate(itemsList);
-      console.log('grouped', grouped);
-      setGroupedItems(grouped);
-    } catch (error) {
-      console.error('Error fetching items:', error);
-      throw error;
-    }
-  };
-
-  // helper function to sort items by date so they are grouped together
-  const groupItemsByDate = (items: Item[]): Record<string, Item[]> => {
-    return items.reduce((groups: Record<string, Item[]>, item) => {
-      const date = parseISO(item.date.toString());
-      let dateKey = format(date, 'MM-dd-yyyy');
-
-      if (isToday(date)) dateKey = 'Today';
-      else if (isYesterday(date)) dateKey = 'Yesterday';
-
-      if (!groups[dateKey]) groups[dateKey] = [];
-      groups[dateKey].push(item);
-  
-      return groups;
-    }, {});
-  }
+  const { items, loadItems } = useItems();
 
   useEffect(() => {
-    fetchItems();
-  }, []);
+    // only load into Redux if lengths differ
+    if (fetchedItems.length !== items.length) {
+      loadItems(fetchedItems)
+    }
+  }, [fetchedItems, items, loadItems])
 
+  const groupedItems = useMemo(() => {
+    return items.reduce<Record<string, Item[]>>((groups, item) => {
+      const d = parseISO(item.date.toString());
+      let key = format(d, 'MM-dd-yyyy');
+      if (isToday(d)) key = 'Today'
+      else if (isYesterday(d)) key = 'Yesterday'
 
-  // function used to calculate total cost of purchases made on a single day
-  const calculateTotalCost = (items: Item[]): number => {
-    return items.reduce((total, item) => total + item.price, 0);
-  }
-
+      groups[key] = groups[key] || []
+      groups[key].push(item)
+      return groups
+    }, {})
+  }, [items])
   
   // handle updating purchase items by passing item to add item modal
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
 
-  const openItemModal = (item: Item) => {
+  const openItemModal = useCallback((item: Item) => {
     setSelectedItem(item);
     setModalVisible(true);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-  }
+  }, [])
 
-  const closeItemModal = () => {
+  const closeItemModal = useCallback(() => {
     setModalVisible(false);
     setSelectedItem(null);
-    fetchItems();
+    refetch();
+  }, [])
+
+  // function used to calculate total cost of purchases made on a single day
+  const calculateTotalCost = useCallback((items: Item[]): number => {
+    return items.reduce((total, item) => total + item.price, 0);
+  }, [])
+
+
+  if (isLoading) {
+    return (
+      <View style={styles.mainContainer}>
+        <Text style={styles.header}>Loading...</Text>
+      </View>
+    )
   }
 
   return (
@@ -89,16 +72,17 @@ export default function explore() {
         data={Object.keys(groupedItems)}
         keyExtractor={(key) => key}
         renderItem={({ item: dateKey }) => {
-          const totalCost = calculateTotalCost(groupedItems[dateKey]);
+          // const totalCost = calculateTotalCost(groupedItems[dateKey]);
+          const dayItems = groupedItems[dateKey]
 
           return (
             <View style={styles.group}>
               {/* date header */}
               <View style={styles.dateHeaderGroup}>
                 <Text style={styles.dateHeader}>{dateKey}</Text>
-                <Text style={styles.dateHeader}>${totalCost}</Text>
+                <Text style={styles.dateHeader}>${calculateTotalCost(dayItems)}</Text>
               </View>
-              {groupedItems[dateKey].map((purchase) => (
+              {dayItems.map((purchase) => (
                 <TouchableOpacity
                   key={purchase.id}
                   style={styles.purchaseItem}
@@ -145,7 +129,7 @@ export default function explore() {
       <AddItem
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
-        onItemAdded={(updatedItem) => {
+        onItemAdded={() => {
           closeItemModal();
         }}
         item={selectedItem}
