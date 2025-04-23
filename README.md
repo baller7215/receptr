@@ -13,7 +13,7 @@ Receptr is a mobile application designed to help users track expenses by scannin
 
 ## Tech Stack
 
-- **Frontend:** React Native, Redux
+- **Frontend:** React Native, Redux, TanStack Query
 - **Backend:** Django REST Framework, PostgreSQL
 - **OCR Processing:** Tesseract OCR, OpenCV
 - **Authentication:** JWT, bcrypt
